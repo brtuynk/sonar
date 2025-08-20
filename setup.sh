@@ -13,6 +13,7 @@ mkdir -p $SONAR_DIR
 
 echo "📂 Docker-compose dosyasını $SONAR_DIR içine kopyalayın ve bu script'i orada çalıştırın."
 cp ./docker-compose.yml $SONAR_DIR/
+cp ./.env $SONAR_DIR/
 
 cd $SONAR_DIR
 
