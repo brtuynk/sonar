@@ -1,14 +1,17 @@
-version: "3"
+version: "3.8"
 
 services:
   sonarqube:
     image: sonarqube:community
+    container_name: sonarqube_server 
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       SONAR_JDBC_URL: ${SONAR_JDBC_URL}
       SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME}
       SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD}
+
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
@@ -17,9 +20,16 @@ services:
       - "9000:9000"
     networks:
       - sonarnet
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
   db:
-    image: postgres:12
+    image: postgres:17
+    container_name: sonarqube_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -28,6 +38,12 @@ services:
       - postgresql_data:/var/lib/postgresql/data
     networks:
       - sonarnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   sonarqube_data:
