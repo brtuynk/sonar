@@ -3,10 +3,6 @@ set -e
 
 SONAR_DIR="/opt/sonarqube"
 
-echo "🛠️ Docker ve docker-compose kuruluyor..."
-apt update
-apt install -y docker.io docker-compose
-
 echo "📁 SonarQube dizini oluşturuluyor..."
 mkdir -p $SONAR_DIR
 
