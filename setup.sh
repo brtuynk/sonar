@@ -2,16 +2,15 @@
 set -e
 
 SONAR_DIR="/opt/sonarqube"
-DOMAIN_NAME="sonarqube.hepapi.com"
 
-echo "🛠️ Docker, docker-compose ve nginx kuruluyor..."
+echo "🛠️ Docker ve docker-compose kuruluyor..."
 apt update
-apt install -y docker.io docker-compose nginx
+apt install -y docker.io docker-compose
 
 echo "📁 SonarQube dizini oluşturuluyor..."
 mkdir -p $SONAR_DIR
 
-echo "📂 Docker-compose dosyasını $SONAR_DIR içine kopyalayın ve bu script'i orada çalıştırın."
+echo "📂 Docker-compose ve .env dosyaları $SONAR_DIR içine kopyalanıyor..."
 cp ./docker-compose.yml $SONAR_DIR/
 cp ./.env $SONAR_DIR/
 
@@ -43,32 +42,10 @@ systemctl daemon-reload
 systemctl enable sonarqube
 systemctl start sonarqube
 
-echo "🌐 NGINX konfigürasyonu hazırlanıyor..."
-
-cat <<EOF > /etc/nginx/sites-available/sonarqube
-server {
-    listen 80;
-    server_name $DOMAIN_NAME;
-
-    location / {
-        proxy_pass http://localhost:9000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}
-EOF
-
-ln -sf /etc/nginx/sites-available/sonarqube /etc/nginx/sites-enabled/sonarqube
-nginx -t && systemctl reload nginx
-
-echo "🧹 Varsayılan NGINX konfigürasyonu kaldırılıyor..."
-rm -f /etc/nginx/sites-enabled/default
-
 echo ""
 echo "✅ Kurulum tamamlandı!"
-echo "🌐 SonarQube http://$DOMAIN_NAME adresinden erişilebilir."
+echo "🌐 SonarQube'e erişmek için makinenizin IP adresini veya alan adını 9000 portu ile kullanabilirsiniz."
+echo "   Örnek: http://<makine_ip_adresi>:9000"
 echo "🛠 Servis yönetimi için:"
 echo "   systemctl status sonarqube"
 echo "   systemctl restart sonarqube"
